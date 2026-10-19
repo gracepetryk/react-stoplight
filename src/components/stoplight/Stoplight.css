@@ -1,0 +1,11 @@
+.stoplight {
+  --bulb-size: 64px;
+
+  display: inline-flex;
+  flex-direction: column;
+  gap: calc(var(--bulb-size) / 4);
+  padding: calc(var(--bulb-size) / 4);
+  background: #1c1c1e;
+  border: 3px solid #0a0a0a;
+  border-radius: calc(var(--bulb-size) / 3);
+}

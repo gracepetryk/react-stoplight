@@ -1,0 +1,15 @@
+.bulb {
+  width: var(--bulb-size, 64px);
+  height: var(--bulb-size, 64px);
+  border-radius: 50%;
+  background: var(--bulb-color);
+  opacity: 0.2;
+  transition:
+    opacity 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.bulb--lit {
+  opacity: 1;
+  box-shadow: 0 0 calc(var(--bulb-size, 64px) / 3) var(--bulb-color);
+}
