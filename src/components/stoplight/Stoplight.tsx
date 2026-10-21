@@ -1,40 +1,35 @@
 import { Bulb } from './Bulb'
-import { useLightState, type LightType } from './lightController'
-import { StoplightState } from './stoplightStates'
+import type { StoplightState } from './stoplightStates'
 import './Stoplight.css'
 
-const BULBS = [
+type BulbId = 'red' | 'yellow' | 'green'
+
+export interface StoplightBulb {
+  /** Which signal this bulb shows; it lights whenever the state includes it. */
+  id: BulbId
+  /** Any CSS color. */
+  color: string
+}
+
+const DEFAULT_BULBS: readonly StoplightBulb[] = [
   { id: 'red', color: '#ff3b30' },
   { id: 'yellow', color: '#ffcc00' },
   { id: 'green', color: '#34c759' },
-] as const
-type BulbId = (typeof BULBS)[number]['id']
+]
 
-// States map to sets of bulbs so a single state can light several bulbs
-// (e.g. red + a turn arrow).
-const LIT_BULBS: Record<StoplightState, readonly BulbId[]> = {
-  [StoplightState.Red]: ['red'],
-  [StoplightState.Yellow]: ['yellow'],
-  [StoplightState.Green]: ['green'],
+export interface StoplightProps {
+  /** The signals currently lit. */
+  states: readonly StoplightState[]
+  /** Rendered top to bottom. Defaults to red, yellow, green. */
+  bulbs?: readonly StoplightBulb[]
 }
 
-const STOPLIGHT: LightType<StoplightState> = {
-  states: Object.values(StoplightState),
-  stopState: StoplightState.Red,
-}
-
-/**
- * A red/yellow/green traffic light that displays the state of the nearest
- * controller.
- */
-export function Stoplight() {
-  const state = useLightState(STOPLIGHT)
-  const lit = LIT_BULBS[state]
-
+/** A traffic light that lights each bulb whose id is in `states`. */
+export function Stoplight({ states, bulbs = DEFAULT_BULBS }: StoplightProps) {
   return (
-    <div className="stoplight" role="img" aria-label={`Stoplight showing ${state}`}>
-      {BULBS.map(({ id, color }) => (
-        <Bulb key={id} color={color} lit={lit.includes(id)} />
+    <div className="stoplight" role="img">
+      {bulbs.map(({ id, color }) => (
+        <Bulb key={id} color={color} lit={states.includes(id)} />
       ))}
     </div>
   )

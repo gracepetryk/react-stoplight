@@ -1,12 +1,7 @@
-import { useEffect, useState, type ReactNode } from 'react'
-import {
-  LightControllerContext,
-  matchState,
-  type LightController,
-} from './lightController'
+import { useEffect, useState } from 'react'
 
 export interface TimedStep<S> {
-  state: S
+  states: S
   durationMs: number
 }
 
@@ -16,7 +11,7 @@ export type TimerSchedule<S> = readonly [TimedStep<S>, ...TimedStep<S>[]]
 function validateSteps<S>(steps: TimerSchedule<S>) {
   // The type forbids an empty schedule, but casts and plain JS callers can still pass one.
   if (steps.length === 0) {
-    throw new Error('TimerController requires at least one step')
+    throw new Error('useTimerSchedule requires at least one step')
   }
   steps.forEach(({ durationMs }, i) => {
     if (!Number.isFinite(durationMs) || durationMs <= 0) {
@@ -27,17 +22,12 @@ function validateSteps<S>(steps: TimerSchedule<S>) {
   })
 }
 
-export interface TimerControllerProps<S> {
-  /** Changing the current step's duration restarts its timer. */
-  steps: TimerSchedule<S>
-  children: ReactNode
-}
-
 /**
- * Cycles through `steps` in order, holding each state for its `durationMs`,
- * and loops forever. Lights rendered inside it display the current state.
+ * Cycles through `steps` in order, holding each step for its `durationMs`,
+ * and loops forever. Returns the current step's `states`. Changing the
+ * current step's duration restarts its timer.
  */
-export function TimerController<S>({ steps, children }: TimerControllerProps<S>) {
+export function useTimerSchedule<S>(steps: TimerSchedule<S>): S {
   validateSteps(steps)
 
   const [index, setIndex] = useState(0)
@@ -54,10 +44,5 @@ export function TimerController<S>({ steps, children }: TimerControllerProps<S>)
     return () => clearTimeout(timer)
   }, [index, step.durationMs, steps.length])
 
-  // A new object each render, so lights re-render whenever the step changes.
-  const controller: LightController = {
-    getLightState: (type) => matchState(type, step.state),
-  }
-
-  return <LightControllerContext value={controller}>{children}</LightControllerContext>
+  return step.states
 }

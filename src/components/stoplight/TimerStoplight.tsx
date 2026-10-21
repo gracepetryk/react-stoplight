@@ -1,28 +1,20 @@
-import { Stoplight } from './Stoplight'
+import { Stoplight, type StoplightProps } from './Stoplight'
 import { StoplightState } from './stoplightStates'
-import { TimerController, type TimerSchedule } from './TimerController'
+import { useTimerSchedule, type TimerSchedule } from './useTimerSchedule'
 
-export interface TimerStoplightProps {
-  redMs?: number
-  yellowMs?: number
-  greenMs?: number
+const DEFAULT_STEPS: TimerSchedule<StoplightState[]> = [
+  { states: [StoplightState.Red], durationMs: 5000 },
+  { states: [StoplightState.Green], durationMs: 2000 },
+  { states: [StoplightState.Yellow], durationMs: 1000 },
+]
+
+export interface TimerStoplightProps extends Omit<StoplightProps, 'states'> {
+  /** Defaults to a red → green → yellow loop. */
+  steps?: TimerSchedule<StoplightState[]>
 }
 
-/** A `Stoplight` driven by a fixed red → green → yellow timer loop. */
-export function TimerStoplight({
-  redMs = 5000,
-  yellowMs = 1000,
-  greenMs = 2000,
-}: TimerStoplightProps) {
-  const steps: TimerSchedule<StoplightState> = [
-    { state: StoplightState.Red, durationMs: redMs },
-    { state: StoplightState.Green, durationMs: greenMs },
-    { state: StoplightState.Yellow, durationMs: yellowMs },
-  ]
-
-  return (
-    <TimerController steps={steps}>
-      <Stoplight />
-    </TimerController>
-  )
+/** A `Stoplight` driven by a timer loop over `steps`. */
+export function TimerStoplight({ steps = DEFAULT_STEPS, bulbs }: TimerStoplightProps) {
+  const states = useTimerSchedule(steps)
+  return <Stoplight states={states} bulbs={bulbs} />
 }
